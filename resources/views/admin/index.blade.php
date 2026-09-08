@@ -59,9 +59,16 @@
         <tbody class="divide-y divide-gray-100">
             @forelse ($submissions as $submission)
                 <tr>
-                    <td class="max-w-xs truncate px-4 py-3">{{ $submission->url }}</td>
+                    <td class="max-w-xs truncate px-4 py-3" title="{{ $submission->url }}">{{ $submission->url }}</td>
                     <td class="px-4 py-3 text-gray-500">{{ $submission->user->email ?? '—' }}</td>
-                    <td class="px-4 py-3"><x-status-badge :status="$submission->status" /></td>
+                    <td class="px-4 py-3">
+                        <x-status-badge :status="$submission->status" />
+                        @if ($submission->failure_reason)
+                            <div class="mt-1 max-w-xs truncate text-xs text-gray-500" title="{{ $submission->failure_reason }}">
+                                {{ $submission->failure_reason }}
+                            </div>
+                        @endif
+                    </td>
                     <td class="px-4 py-3 text-gray-500">{{ $submission->http_status_code ?? '—' }}</td>
                     <td class="px-4 py-3 text-gray-500">{{ $submission->created_at->format('Y-m-d H:i') }}</td>
                     <td class="px-4 py-3 text-right">

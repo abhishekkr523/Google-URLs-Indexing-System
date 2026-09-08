@@ -20,6 +20,10 @@ class UrlSubmission extends Model
 
     public const STATUS_ERROR = 'error';
 
+    // IndexNow statuses (separate from Google Indexing API)
+    public const INDEXNOW_SUBMITTED = 'submitted';
+    public const INDEXNOW_FAILED    = 'failed';
+
     protected $fillable = [
         'user_id',
         'url',
@@ -30,6 +34,10 @@ class UrlSubmission extends Model
         'failure_reason',
         'requested_at',
         'processed_at',
+        // IndexNow
+        'indexnow_status',
+        'indexnow_http_status',
+        'indexnow_reason',
     ];
 
     protected $casts = [

@@ -60,6 +60,18 @@ return [
             'report' => false,
         ],
 
+        'infinity_ftp' => [
+        'driver'   => 'ftp',
+        'host'     => env('INFINITY_FTP_HOST', 'ftpupload.net'),
+        'username' => env('INFINITY_FTP_USERNAME'),
+        'password' => env('INFINITY_FTP_PASSWORD'),
+        'port'     => (int) env('INFINITY_FTP_PORT', 21),
+        'root'     => "", // InfinityFree ka public folder
+        'passive'  => false,
+        'ssl'      => false,
+        'timeout'  => 30,
+    ],
+
     ],
 
     /*

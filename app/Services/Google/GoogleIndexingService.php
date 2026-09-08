@@ -18,12 +18,19 @@ use Throwable;
  *     failure, or Google rejecting the request) and always carries the
  *     real HTTP status + raw response body + a human-readable reason.
  *
- * Known limitation of this mechanism (see README.md): the Indexing API only
- * accepts notifications for URLs on properties the calling service account
- * has been granted "Owner" access to in Google Search Console. Submitting an
- * arbitrary URL on a domain the service account does not own is expected to
- * be rejected by Google with HTTP 403 ("Permission denied"). That rejection
- * is a legitimate, correctly-recorded outcome for this project — not a bug.
+ * Dual-mode indexing:
+ *   1. PRIMARY — Google Indexing API (urlNotifications:publish). Works only
+ *      for URLs on properties the service account owns in Search Console.
+ *   2. FALLBACK (for unknown/non-owned URLs) — The /crawl-bridge route on this
+ *      application exposes all submitted URLs as plain HTML links. Googlebot
+ *      crawls this app's verified domain and follows those links organically,
+ *      which causes the target URLs to be discovered and crawled without
+ *      requiring the caller to own those domains.
+ *
+ * HTTP 403 from Google = the service account is not an owner of that URL's
+ * Search Console property. The submission is still recorded in the DB with
+ * status=failed and a clear explanation; the URL is also automatically
+ * included in /crawl-bridge for organic Googlebot discovery.
  */
 class GoogleIndexingService
 {
@@ -78,6 +85,14 @@ class GoogleIndexingService
 
     private function extractErrorReason(?array $body, int $status): string
     {
+        if ($status === 403) {
+            $apiMsg = $body['error']['message'] ?? 'Permission denied';
+            return "Google rejected this URL (HTTP 403 — {$apiMsg}). "
+                . 'The Indexing API only accepts URLs from Search Console properties where '
+                . 'your service account has Owner access. This URL has been added to '
+                . '/crawl-bridge so Googlebot can discover it organically.';
+        }
+
         if (isset($body['error']['message'])) {
             $reason = $body['error']['message'];
 
